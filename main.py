@@ -1,4 +1,5 @@
 import discord
+from keep_alive import keep_alive
 from discord.ext import commands
 import logging
 import os
@@ -16,6 +17,8 @@ handler = logging.FileHandler(
         encoding='utf-8',
         mode='w'
         )
+
+keep_alive()
 
 intents = discord.Intents.default()
 intents.members = True
