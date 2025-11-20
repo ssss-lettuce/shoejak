@@ -1,11 +1,12 @@
 import discord
 from keep_alive import keep_alive
-from discord.ext import commands
+from discord.ext import commands, tasks
 import logging
 import os
 from dotenv import load_dotenv
 import requests
 import asyncio
+import datetime
 
 
 load_dotenv()
@@ -29,10 +30,37 @@ bot = commands.Bot(
         intents=intents,
         )
 
+newday = datetime.time(hour=15, minute=00, second=0, tzinfo=datetime.timezone.utc)
+
+@tasks.loop(time=newday)
+async def anewday():
+    channel = bot.get_channel(1437799362087354520)
+    await channel.send("It's a new day! 🌞")
+    await channel.send("https://cdn.discordapp.com/stickers/1425894902037741689.png")
+    print("its a new day")
 
 @bot.event
 async def on_ready():
+    if not anewday.is_running():
+        anewday.start()
+        print("new day started!")
     print("Shoejak up and running.")
+
+
+universalCount = 0
+universalLimit = 10
+
+@bot.event
+async def on_message(message):
+    global universalCount
+    global universalLimit
+    universalCount += 1
+    if (int(message.author.id) != 1437798966585720944) and (universalLimit == universalCount):
+        funnymsg = random.choice(shoelines)
+        await message.reply(str(funnymsg))
+        universalCount = 0
+        universalLimit = random.randint(50, 300)
+        print("new universal limit" )
 
 
 @bot.command()
