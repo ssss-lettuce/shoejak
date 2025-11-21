@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 import logging
 import os
 from dotenv import load_dotenv
+import random
 import requests
 import asyncio
 import datetime
@@ -32,12 +33,14 @@ bot = commands.Bot(
 
 newday = datetime.time(hour=15, minute=00, second=0, tzinfo=datetime.timezone.utc)
 
+
 @tasks.loop(time=newday)
 async def anewday():
-    channel = bot.get_channel(1437799362087354520)
+    channel = bot.get_channel(1425869555254956055)
     await channel.send("It's a new day! 🌞")
     await channel.send("https://cdn.discordapp.com/stickers/1425894902037741689.png")
     print("its a new day")
+
 
 @bot.event
 async def on_ready():
@@ -49,6 +52,7 @@ async def on_ready():
 
 universalCount = 0
 universalLimit = 10
+shoelines = ["just making sure i dont shoe in", "i am shoejak and this is my message", "glory to umaori", "ohioooo", "shoes or death", "hachimihachimihachimi"]
 
 @bot.event
 async def on_message(message):
