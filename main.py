@@ -9,11 +9,16 @@ import requests
 import asyncio
 import datetime
 import json
+from supabase import create_client, Client
 
 
 load_dotenv()
 token = os.environ.get('DISCORD_TOKEN')
 # botid = int(os.environ.get('BOT_ID'))    # Beta
+url = os.environ.get("SUPABASE_URL")
+key = os.environ.get("SUPABASE_KEY")
+supabase = create_client(url, key)
+warnings = supabase.table(os.environ.get("SUPABASE_DB"))
 
 handler = logging.FileHandler(
         filename='discord.log',
@@ -104,12 +109,53 @@ async def top(ctx):
 
 
 @bot.command()
-async def warn(ctx, member: discord.Member):
+async def warn(ctx, member: discord.Member=None,*, cat: str=None):
+    print("Warning...")
+    msg = ""
     if member is None:
         await ctx.send("who are you warning")
+        return
     else:
         username = member.name
-        await ctx.send("you have been warned " + username)
+
+    msg += "you have been warned " + username
+    if cat is not None:
+        msg += " for " "\""+cat+"\""
+
+    else:
+        cat = "No reason given"
+
+    print(f"warning {username} for {cat}, attempting to update db")
+    warnings.insert({"user_id": member.id, "reason": cat}).execute()
+    print("db update successful")
+    await ctx.send(msg)
+
+@bot.command()
+async def log(ctx, member: discord.Member=None):
+    if member is None:
+        member = ctx.author
+    userid = member.id
+    test = warnings.select("reason", "id").eq("user_id", userid).execute().data
+    msg = ""
+    if len(test) == 0:
+        await ctx.send("zero warnings good oomfie")
+        return
+    for warning in test:
+        msg += f"id: {warning["id"]} | {warning["reason"]} \n"
+    await ctx.send(msg)
+
+@bot.command()
+async def rmwarn(ctx, id: int = None):
+    if id is None:
+        print("Please specify the id baka")
+        return
+    else:
+        warninglist = warnings.select("reason", "id").eq("id", id).execute().data
+        if len(warninglist) == 0:
+            await ctx.send("no warning to remove")
+        else:
+            warnings.delete().eq("id", id).execute()
+            await ctx.send("warning removed")
 
 @bot.command()
 async def av(ctx, member: discord.Member):
