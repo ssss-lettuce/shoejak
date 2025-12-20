@@ -8,6 +8,7 @@ import random
 import requests
 import asyncio
 import datetime
+import json
 
 
 load_dotenv()
@@ -27,7 +28,7 @@ intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(
-        command_prefix='!shoejak ',
+        command_prefix='!',
         intents=intents,
         )
 
@@ -36,10 +37,26 @@ newday = datetime.time(hour=15, minute=00, second=0, tzinfo=datetime.timezone.ut
 
 @tasks.loop(time=newday)
 async def anewday():
+    presentday = datetime.datetime.now().day-2
+    clubinfo = requests.get("https://uma.moe/api/v4/circles?circle_id=136447683").json()["members"]
+    bar = 0
+    numberone = None
+    for member in clubinfo:
+        if member["daily_fans"][presentday] > bar:
+            bar = member["daily_fans"][presentday]
+            numberone = member["trainer_name"]
+
+
+
     channel = bot.get_channel(1425869555254956055)
+
+    if numberone is not None:
+        await channel.send(f"the current number one is {numberone}")
+
     await channel.send("It's a new day! 🌞")
     await channel.send("https://cdn.discordapp.com/stickers/1425894902037741689.png")
     print("its a new day")
+
 
 
 @bot.event
@@ -52,7 +69,9 @@ async def on_ready():
 
 universalCount = 0
 universalLimit = 10
-shoelines = ["just making sure i dont shoe in", "i am shoejak and this is my message", "glory to umaori", "ohioooo", "shoes or death", "hachimihachimihachimi"]
+shoelines = ["just making sure i dont shoe in", "i am shoejak and this is my message", "glory to umaori", "ohioooo", "shoes or death", "hachimihachimihachimi", "my name is shoejak and im gonna jak", "im here to jak a shoe"]
+dailylines = ["everybody give a poggies!", "say thank you", "what skill"]
+
 
 @bot.event
 async def on_message(message):
@@ -65,10 +84,46 @@ async def on_message(message):
         universalCount = 0
         universalLimit = random.randint(50, 300)
         print("new universal limit" )
+    await bot.process_commands(message)
+
+@bot.command()
+async def top(ctx):
+    print("im shoeing:")
+    presentday = datetime.datetime.now().day - 2
+    clubinfo = requests.get("https://uma.moe/api/v4/circles?circle_id=136447683").json()["members"]
+    bar = 0
+    numberone = None
+    for member in clubinfo:
+        diff = (member["daily_fans"][presentday] - member["daily_fans"][presentday-1])
+        if diff > bar:
+            bar = diff 
+            numberone = member["trainer_name"]
+
+    if numberone is not None:
+        await ctx.send(f"the number one fan gainer of 2 days ago is {numberone}, with {bar} fans \n")
+
+
+@bot.command()
+async def warn(ctx, member: discord.Member):
+    if member is None:
+        await ctx.send("who are you warning")
+    else:
+        username = member.name
+        await ctx.send("you have been warned " + username)
+
+@bot.command()
+async def av(ctx, member: discord.Member):
+    if member is None:
+        member = ctx.author
+
+    data = member.display_avatar.url
+    await ctx.send(data)
 
 
 @bot.command()
 async def char(ctx, *, name: str = None):
+    print("char initiated")
+
     if name is None:
         list = requests.get("https://api.umapyoi.net/api/v1/character/list").json()
         characters = []
