@@ -4,3 +4,4 @@ requests
 aiohttp
 flask
 keep-alive
+supabase
