@@ -42,22 +42,7 @@ newday = datetime.time(hour=15, minute=00, second=0, tzinfo=datetime.timezone.ut
 
 @tasks.loop(time=newday)
 async def anewday():
-    presentday = datetime.datetime.now().day-2
-    clubinfo = requests.get("https://uma.moe/api/v4/circles?circle_id=136447683").json()["members"]
-    bar = 0
-    numberone = None
-    for member in clubinfo:
-        if member["daily_fans"][presentday] > bar:
-            bar = member["daily_fans"][presentday]
-            numberone = member["trainer_name"]
-
-
-
     channel = bot.get_channel(1425869555254956055)
-
-    if numberone is not None:
-        await channel.send(f"the current number one is {numberone}")
-
     await channel.send("It's a new day! 🌞")
     await channel.send("https://cdn.discordapp.com/stickers/1425894902037741689.png")
     print("its a new day")
