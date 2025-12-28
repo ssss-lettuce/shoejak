@@ -38,11 +38,20 @@ bot = commands.Bot(
         )
 
 newday = datetime.time(hour=15, minute=00, second=0, tzinfo=datetime.timezone.utc)
+test = datetime.time(hour=15, minute=43, second=0, tzinfo=datetime.timezone.utc)
 
 
 @tasks.loop(time=newday)
 async def anewday():
     channel = bot.get_channel(1425869555254956055)
+    await channel.send("It's a new day! 🌞")
+    await channel.send("https://cdn.discordapp.com/stickers/1425894902037741689.png")
+    print("its a new day")
+
+
+@tasks.loop(time=test)
+async def anewday():
+    channel = bot.get_channel(1437799362087354520)
     await channel.send("It's a new day! 🌞")
     await channel.send("https://cdn.discordapp.com/stickers/1425894902037741689.png")
     print("its a new day")
@@ -126,7 +135,7 @@ async def log(ctx, member: discord.Member=None):
         await ctx.send("zero warnings good oomfie")
         return
     for warning in test:
-        msg += f"id: {warning["id"]} | {warning["reason"]} \n"
+        msg += f"id: {warning['id']} | {warning['reason']} \n"
     await ctx.send(msg)
 
 @bot.command()
